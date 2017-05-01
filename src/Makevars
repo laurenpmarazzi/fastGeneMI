@@ -1,0 +1,3 @@
+PKG_LIBS= $(shell $(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()") $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) $(SHLIB_OPENMP_CFLAGS) -fopenmp
+PKG_CFLAGS = $(SHLIB_OPENMP_CFLAGS)
+PKG_CXXFLAGS = -fopenmp -O3

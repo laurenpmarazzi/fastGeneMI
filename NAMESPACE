@@ -1,0 +1,3 @@
+useDynLib(fastGeneMI)
+importFrom(Rcpp, evalCpp)
+exportPattern("^[[:alpha:]]+")
