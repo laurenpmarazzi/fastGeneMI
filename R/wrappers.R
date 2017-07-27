@@ -11,6 +11,8 @@
 #'
 #' @return A symmetric matrix of pairwise mutual information between the expression of pairs of genes. These are the mutual information estimtates between pairs of columns of \code{expr.data}.
 #'
+#' \@references \insertRef{daub2004estimating}{fastGeneMI}
+#'
 #' @export
 
 get.mim.ML <- function(expr.data, discretisation=c("equalwidth", "equalfreq", "bb"), n.bins=as.integer(nrow(expr.data)^(1/3)), n.cores=1L) {
