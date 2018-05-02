@@ -1,26 +1,67 @@
+// MIT License
+
+// Copyright (c) 2018 Jonathan Ish-Horowicz
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 // ----------------------------------------------------------------------------------
 //  Implementation of the B-spline Mutual information estimation method
 // ----------------------------------------------------------------------------------
 
 #include "fastGeneMI.h"
-//#include "util_funcs.cpp"
 
 using namespace Rcpp;
 
-// Speed ideas: memoisation, move knot vector out of class (as it always the same)
+// MIT License
+
+// Copyright (c) 2018 Jonathan Ish-Horowicz
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 // ----------------------------------------------------------------------------------
 //  Class that returns bspline coefficients
 // ----------------------------------------------------------------------------------
 
 // Constructor
-Bspline::Bspline(const int k_, const int n_bins_, const arma::vec& x_)
+Bspline::Bspline(const int k_, const int n_bins_, const arma::vec& x_, const arma::vec& t_)
 {
   k = k_;
   n_bins = n_bins_;
   x = x_;
   n_pts = x.n_elem;
-  t = get_knots();
+  t = t_;
   tmax = t.max();
   
   // Transform data to range of knot vector and trim maximum values
@@ -36,23 +77,6 @@ void Bspline::print() const
   Rcout << "z^T=" << arma::trans(z) << std::endl;
 }
 
-// Get the knot vector - take this out of class and pass to constructor
-arma::vec Bspline::get_knots() const
-{
-  int n_knots(k + n_bins);
-  arma::vec t(n_knots, arma::fill::zeros);
-  
-  // Intermediate (non-zero) knots
-  for(int i(k); i<n_bins; ++i)
-  {
-    t(i) = (double)i - (double)k + 1.0;
-  }
-  
-  // End values
-  arma::vec ones = arma::vec(k, arma::fill::ones);
-  t.rows(n_knots-k, n_knots-1) = ((double)n_bins - (double)k + 1.0) * ones;
-  return t;
-}
 
 // Return zero-th order basis function
 arma::vec Bspline::basis0(const double zi) const
@@ -97,25 +121,44 @@ arma::vec Bspline::basis(const double zi, const int p) const
 
 // Evaluate the B-spline basis functions at each point and return
 // the result as a sparse matrix
-arma::sp_mat Bspline::compute_bspl_coeffs()
+inline arma::sp_mat Bspline::compute_bspl_coeffs()
 {
-  int ct(0);
+  // int ct(0);
   arma::mat res = arma::mat(n_pts, n_bins, arma::fill::zeros);
   for(int i(0); i<n_pts; ++i)
   {
     res.row(i) = basis(z[i], k-1).t();
-  }
+  } 
+
   // Zero small values
   res.elem(arma::find(res<1e-10)).zeros();
   return arma::sp_mat(res);
+  
 }
 
 // Wrapper for computing bspline coefficients
-arma::sp_mat get_bspl_coeffs(const arma::vec& x, const int n_bins, const int k)
+arma::sp_mat get_bspl_coeffs(const arma::vec& x, const int n_bins, const int k, const arma::vec& t)
 {
-  Bspline bspl = Bspline(k, n_bins, x);
+  Bspline bspl = Bspline(k, n_bins, x, t);
   //bspl.print();
   return bspl.compute_bspl_coeffs();
+}
+
+// Get the knot vector
+arma::vec get_knots(const int k, const int n_bins)
+{
+  int n_knots(k + n_bins);
+  arma::vec t(n_knots, arma::fill::zeros);
+  
+  // Intermediate (non-zero) knots
+  for(int i(k); i<n_bins; ++i)
+  {
+    t(i) = (double)i - (double)k + 1.0;
+  }
+  
+  // End values
+  t.rows(n_knots-k, n_knots-1) = ((double)n_bins - (double)k + 1.0) * arma::vec(k, arma::fill::ones);
+  return t;
 }
 
 
@@ -127,7 +170,8 @@ arma::mat mim_bspline_cpp(NumericMatrix expr_data, const int k, const int n_bins
   // Convert arguments to Armadillo objects
   const arma::mat data = R2armaMat_num(expr_data); // Continuous data does not need reindexing R->C++
   const int n_genes(data.n_cols), n_samples(data.n_rows);
-  const int n_pairs = (int)(((double)n_genes/2.0) * (double)(n_genes+1));
+  const int n_pairs = get_n_gene_pairs(n_genes);
+  const arma::vec t = get_knots(k, n_bins);
   
   // Compute bspline coefficients in parallel
   int j;
@@ -137,10 +181,10 @@ arma::mat mim_bspline_cpp(NumericMatrix expr_data, const int k, const int n_bins
   omp_set_num_threads(n_cores);
   
   std::vector<arma::sp_mat> bspl_coeffs(n_genes);
-  #pragma omp parallel for shared(bspl_coeffs) private(j) schedule(auto) default(none)
-  for(j=0; j<n_genes; ++j)
+  #pragma omp parallel for shared(bspl_coeffs) schedule(auto) default(none)
+  for(int j=0; j<n_genes; ++j)
   {
-    bspl_coeffs[j] = get_bspl_coeffs(data.col(j), n_bins, k);
+    bspl_coeffs[j] = get_bspl_coeffs(data.col(j), n_bins, k, t);
   }
   
   //Rcout << "Got bspline coefficients\n";
@@ -157,23 +201,17 @@ arma::mat mim_bspline_cpp(NumericMatrix expr_data, const int k, const int n_bins
   //Rcout << "Got marginal probabilities and entropies\n";
   
   // Compute joint probabilities and entropies in parallel
-  arma::mat p_joint;
-  const arma::Mat<int> idx_lookup = get_idx_lookup_mat(n_genes);
   std::vector<double> h_joints(n_pairs);
-  int i;
-  
-  #pragma omp parallel for shared(h_joints,bspl_coeffs) private(i,j,p_joint) schedule(dynamic) default(none) collapse(2)
-  for(i=0; i<n_genes; ++i)
+
+  const std::vector<std::pair <int,int> > ij_pairs = get_ij_list(n_genes);
+
+  #pragma omp parallel for shared(bspl_coeffs, h_joints)
+  for(int ij=0; ij<n_pairs; ++ij)
   {
-    for(j=0; j<n_genes; ++j)
-    {
-      if(i<=j)
-      {
-        int idx = idx_lookup(i,j);
-        p_joint = (bspl_coeffs[i].t() * bspl_coeffs[j])/(double)n_samples;
-        h_joints[idx] = -arma::accu(p_joint % arma::log(p_joint + 1e-16));
-      }
-    }
+    std::pair <int,int> ij_pair = ij_pairs[ij];
+    int i(ij_pair.first), j(ij_pair.second);
+    arma::mat p_joint = arma::mat((bspl_coeffs[i].t() * bspl_coeffs[j])/(double)n_samples);
+    h_joints[ij] = -arma::accu(p_joint % arma::log(p_joint + 1e-16));
   }
   
   //Rcout << "Got joint probabilities and entropies\n";

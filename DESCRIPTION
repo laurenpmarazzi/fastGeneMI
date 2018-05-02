@@ -1,14 +1,15 @@
 Package: fastGeneMI
 Type: Package
-Title: A range of mutual information estimators for gene regulatory network inference from microarray expression data.
+Title: A Suite of Mutual Information Estimators used for Gene Regulatory Network Inference from Microarray Expression Data
 Version: 1.0
-Date: 2017-02-08
+Date: 2018-02-05
 Author: Jonathan Ish-Horowicz
-Maintainer: Jonathan Ish-Horowicz <jonathan.horowicz@mrc-bsu.cam.ac.uk>
-Description: Provides implementations of several mutual information estimators for use with the gene network inference algorthims CLR, ARACNE and MRNET.
+Maintainer: Jonathan Ish-Horowicz <jonathan.ish-horowicz17@imperial.ac.uk>
+Description: Provides implementations of several mutual information estimators for use with the gene network inference algorthims CLR, ARACNE and MRNET
+Depends: R (>= 2.10)
 License: MIT
 LazyData: true
-Imports: Rcpp (>= 0.12.9), infotheo, parmigene, PRROC, KernSmooth, parallel, minet
+Imports: Rcpp (>= 0.12.9), infotheo, PRROC, minet
 Suggests: Rdpack
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 6.0.1

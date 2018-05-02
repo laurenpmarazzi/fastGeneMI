@@ -8,6 +8,8 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <map>
+#include <utility> 
 
 #include <omp.h>
 // [[Rcpp::plugins(openmp)]]
@@ -44,27 +46,21 @@ arma::mat mim_bspline_cpp(NumericMatrix expr_data, const int order, NumericVecto
 class Bspline {
   
 public:
-  Bspline(const int k_, const int n_bins_, const arma::vec& x_);
+  Bspline(const int k_, const int n_bins_, const arma::vec& x_, const arma::vec& t_);
   void print() const;
-  arma::sp_mat compute_bspl_coeffs();
+  inline arma::sp_mat compute_bspl_coeffs();
   
 private:
   int n_bins, k, n_pts; // # bins and spline order
   arma::vec x, z, t; // Points at which to evaluate and knot vector
   double tmax;
   
-  arma::vec get_knots() const;
+  // arma::vec get_knots(const int k, const int n_bins);
   
   // Basis
   arma::vec basis0(const double zi) const;
   arma::vec basis(const double zi, const int p) const;
 };
-
-// In kde_mi.cppp
-arma::vec get_1d_kde(const arma::vec& datacol, const int n_samples, const int n_eval_pts, const double h_1d);
-arma::mat get_cov_mat(const arma::vec& datacol_i, const arma::vec& datacol_j);
-arma::mat get_2d_kde(const arma::vec& datacol_i, const arma::vec& datacol_j, const int n_samples, const int n_eval_pts, const double h_2d);
-arma::mat mim_kde_cpp(NumericMatrix expr_data, const int n_eval_pts, const bool log_transform, const double eps);
 
 // In util_funcs.cpp
 arma::mat R2armaMat_num(NumericMatrix rMat);
@@ -72,7 +68,8 @@ arma::vec R2armaVec_num(NumericVector rVec);
 int rNumVec2int(NumericVector rVec);
 double get_marginal_ml_entropy(const arma::vec& p_marg);
 double get_joint_ml_entropy(const arma::mat& p_joint);
+int get_n_gene_pairs(const int n_genes);
 arma::Mat<int> get_idx_lookup_mat(const int n_genes);
-
+std::vector<std::pair <int,int> > get_ij_list(const int n_genes);
 
 # endif // __FAST_MINET__

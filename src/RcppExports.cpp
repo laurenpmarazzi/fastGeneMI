@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // disc_dataset_bb_cpp
 arma::Mat<int> disc_dataset_bb_cpp(NumericMatrix expr_data, const int n_cores);
-RcppExport SEXP fastGeneMI_disc_dataset_bb_cpp(SEXP expr_dataSEXP, SEXP n_coresSEXP) {
+RcppExport SEXP _fastGeneMI_disc_dataset_bb_cpp(SEXP expr_dataSEXP, SEXP n_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,7 +20,7 @@ END_RCPP
 }
 // get_bb_bin_edges_cpp
 arma::vec get_bb_bin_edges_cpp(NumericVector expr_prof);
-RcppExport SEXP fastGeneMI_get_bb_bin_edges_cpp(SEXP expr_profSEXP) {
+RcppExport SEXP _fastGeneMI_get_bb_bin_edges_cpp(SEXP expr_profSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -31,7 +31,7 @@ END_RCPP
 }
 // mim_bspline_cpp
 arma::mat mim_bspline_cpp(NumericMatrix expr_data, const int k, const int n_bins, const int n_cores);
-RcppExport SEXP fastGeneMI_mim_bspline_cpp(SEXP expr_dataSEXP, SEXP kSEXP, SEXP n_binsSEXP, SEXP n_coresSEXP) {
+RcppExport SEXP _fastGeneMI_mim_bspline_cpp(SEXP expr_dataSEXP, SEXP kSEXP, SEXP n_binsSEXP, SEXP n_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -45,7 +45,7 @@ END_RCPP
 }
 // mim_ML_cpp
 arma::mat mim_ML_cpp(NumericMatrix disc_expr_data, int n_cores);
-RcppExport SEXP fastGeneMI_mim_ML_cpp(SEXP disc_expr_dataSEXP, SEXP n_coresSEXP) {
+RcppExport SEXP _fastGeneMI_mim_ML_cpp(SEXP disc_expr_dataSEXP, SEXP n_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -57,7 +57,7 @@ END_RCPP
 }
 // mim_MM_cpp
 arma::mat mim_MM_cpp(NumericMatrix disc_expr_data, int n_cores);
-RcppExport SEXP fastGeneMI_mim_MM_cpp(SEXP disc_expr_dataSEXP, SEXP n_coresSEXP) {
+RcppExport SEXP _fastGeneMI_mim_MM_cpp(SEXP disc_expr_dataSEXP, SEXP n_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -69,7 +69,7 @@ END_RCPP
 }
 // mim_CS_cpp
 arma::mat mim_CS_cpp(NumericMatrix disc_expr_data, int n_cores);
-RcppExport SEXP fastGeneMI_mim_CS_cpp(SEXP disc_expr_dataSEXP, SEXP n_coresSEXP) {
+RcppExport SEXP _fastGeneMI_mim_CS_cpp(SEXP disc_expr_dataSEXP, SEXP n_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -81,7 +81,7 @@ END_RCPP
 }
 // mim_shrink_cpp
 arma::mat mim_shrink_cpp(NumericMatrix disc_expr_data, int n_cores);
-RcppExport SEXP fastGeneMI_mim_shrink_cpp(SEXP disc_expr_dataSEXP, SEXP n_coresSEXP) {
+RcppExport SEXP _fastGeneMI_mim_shrink_cpp(SEXP disc_expr_dataSEXP, SEXP n_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -90,4 +90,20 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(mim_shrink_cpp(disc_expr_data, n_cores));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_fastGeneMI_disc_dataset_bb_cpp", (DL_FUNC) &_fastGeneMI_disc_dataset_bb_cpp, 2},
+    {"_fastGeneMI_get_bb_bin_edges_cpp", (DL_FUNC) &_fastGeneMI_get_bb_bin_edges_cpp, 1},
+    {"_fastGeneMI_mim_bspline_cpp", (DL_FUNC) &_fastGeneMI_mim_bspline_cpp, 4},
+    {"_fastGeneMI_mim_ML_cpp", (DL_FUNC) &_fastGeneMI_mim_ML_cpp, 2},
+    {"_fastGeneMI_mim_MM_cpp", (DL_FUNC) &_fastGeneMI_mim_MM_cpp, 2},
+    {"_fastGeneMI_mim_CS_cpp", (DL_FUNC) &_fastGeneMI_mim_CS_cpp, 2},
+    {"_fastGeneMI_mim_shrink_cpp", (DL_FUNC) &_fastGeneMI_mim_shrink_cpp, 2},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_fastGeneMI(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

@@ -2,30 +2,30 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 disc_dataset_bb_cpp <- function(expr_data, n_cores) {
-    .Call('fastGeneMI_disc_dataset_bb_cpp', PACKAGE = 'fastGeneMI', expr_data, n_cores)
+    .Call('_fastGeneMI_disc_dataset_bb_cpp', PACKAGE = 'fastGeneMI', expr_data, n_cores)
 }
 
 get_bb_bin_edges_cpp <- function(expr_prof) {
-    .Call('fastGeneMI_get_bb_bin_edges_cpp', PACKAGE = 'fastGeneMI', expr_prof)
+    .Call('_fastGeneMI_get_bb_bin_edges_cpp', PACKAGE = 'fastGeneMI', expr_prof)
 }
 
 mim_bspline_cpp <- function(expr_data, k, n_bins, n_cores) {
-    .Call('fastGeneMI_mim_bspline_cpp', PACKAGE = 'fastGeneMI', expr_data, k, n_bins, n_cores)
+    .Call('_fastGeneMI_mim_bspline_cpp', PACKAGE = 'fastGeneMI', expr_data, k, n_bins, n_cores)
 }
 
 mim_ML_cpp <- function(disc_expr_data, n_cores) {
-    .Call('fastGeneMI_mim_ML_cpp', PACKAGE = 'fastGeneMI', disc_expr_data, n_cores)
+    .Call('_fastGeneMI_mim_ML_cpp', PACKAGE = 'fastGeneMI', disc_expr_data, n_cores)
 }
 
 mim_MM_cpp <- function(disc_expr_data, n_cores) {
-    .Call('fastGeneMI_mim_MM_cpp', PACKAGE = 'fastGeneMI', disc_expr_data, n_cores)
+    .Call('_fastGeneMI_mim_MM_cpp', PACKAGE = 'fastGeneMI', disc_expr_data, n_cores)
 }
 
 mim_CS_cpp <- function(disc_expr_data, n_cores) {
-    .Call('fastGeneMI_mim_CS_cpp', PACKAGE = 'fastGeneMI', disc_expr_data, n_cores)
+    .Call('_fastGeneMI_mim_CS_cpp', PACKAGE = 'fastGeneMI', disc_expr_data, n_cores)
 }
 
 mim_shrink_cpp <- function(disc_expr_data, n_cores) {
-    .Call('fastGeneMI_mim_shrink_cpp', PACKAGE = 'fastGeneMI', disc_expr_data, n_cores)
+    .Call('_fastGeneMI_mim_shrink_cpp', PACKAGE = 'fastGeneMI', disc_expr_data, n_cores)
 }
 

@@ -1,5 +1,27 @@
 # Wrappers for the functions in RcppExports.R
 
+# MIT License
+
+# Copyright (c) 2018 Jonathan Ish-Horowicz
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+  
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 #' Maximum Likelihood mutual information estimate
 #'
 #' Returns a symmetric matrix of pairwise Maximum Likelihood mutual information estimates from a samples x genes matrix of expression values. The \eqn{ij^{th}} element is the mutual information estimate between the expression of genes \eqn{i} and \eqn{j}.
@@ -10,8 +32,6 @@
 #' @param n.cores The number of cores to use for the computation. The default is 1.
 #'
 #' @return A symmetric matrix of pairwise mutual information between the expression of pairs of genes. These are the mutual information estimtates between pairs of columns of \code{expr.data}.
-#'
-#' \@references \insertRef{daub2004estimating}{fastGeneMI}
 #'
 #' @export
 
@@ -52,7 +72,7 @@ get.mim.MM <- function(expr.data, discretisation=c("equalwidth", "equalfreq", "b
 
 #' Chao-Shen Likelihood mutual information estimate
 #'
-#' Returns a symmetric matrix of pairwise Chao-Shen mutual information estimates from a samples x genes matrix of expression values. The \eqn{ij^{th}} element is the mutual information estimate between the expression of genes \eqn{i} and \eqn{j}.
+#' Returns a symmetric matrix of pairwise Chao-Shen mutual information estimates from a samples x genes matrix of expression values. The \eqn{ij^{th}} element is the mutual information estimate between the expression of genes \eqn{i} and \eqn{j} in nats.
 #'
 #' @param expr.data A samples x genes matrix of expression values.
 #' @param discretisation The types of bins into which the expression data will be discretised. Can choose equal width bins (\code{"equalwidth"}), equal frequency bins (\code{"equalfreq"}) or Bayesian Blocks bins (\code{"bb"})
@@ -76,7 +96,7 @@ get.mim.CS <- function(expr.data, discretisation=c("equalwidth", "equalfreq", "b
 
 #' Shrinkage mutual information estimate
 #'
-#' Returns a symmetric matrix of pairwise Shrinkage mutual information estimates from a samples x genes matrix of expression values. The \eqn{ij^{th}} element is the mutual information estimate between the expression of genes \eqn{i} and \eqn{j}.
+#' Returns a symmetric matrix of pairwise Shrinkage mutual information estimates from a samples x genes matrix of expression values. The \eqn{ij^{th}} element is the mutual information estimate between the expression of genes \eqn{i} and \eqn{j} in nats.
 #'
 #' @param expr.data A samples x genes matrix of expression values.
 #' @param discretisation The types of bins into which the expression data will be discretised. Can choose equal width bins (\code{"equalwidth"}), equal frequency bins (\code{"equalfreq"}) or Bayesian Blocks bins (\code{"bb"})
@@ -100,7 +120,7 @@ get.mim.shrink <- function(expr.data, discretisation=c("equalwidth", "equalfreq"
 
 #' B-spline mutual information estimate
 #'
-#' Returns a symmetric matrix of pairwise B-spline mutual information estimates from a samples x genes matrix of expression values. The \eqn{ij^{th}} element is the mutual information estimate between the expression of genes \eqn{i} and \eqn{j}.
+#' Returns a symmetric matrix of pairwise B-spline mutual information estimates from a samples x genes matrix of expression values. The \eqn{ij^{th}} element is the mutual information estimate between the expression of genes \eqn{i} and \eqn{j} in nats.
 #'
 #' @param expr.data A samples x genes matrix of expression values.
 #' @param order The order of the B-spline used to smooth the histograms. This must be greater than 1 + the number of bins.
@@ -129,22 +149,6 @@ get.mim.bspline <- function(expr.data, order, n.bins=as.integer(nrow(expr.data)^
   rownames(mim) <- colnames(expr.data)
   colnames(mim) <- colnames(expr.data)
   return(mim)
-}
-
-#' \eqn{k}-nearest-neighbour mutual information estimate
-#'
-#' Returns a symmetric matrix of pairwise \eqn{k}-nearest-neighbour mutual information estimates from a samples x genes matrix of expression values. The \eqn{ij^{th}} element is the mutual information estimate between the expression of genes \eqn{i} and \eqn{j}. This is a wrapper for the \code{parmigene} function \code{knnmi.all}.
-#'
-#' @param expr.data A samples x genes matrix of expression values.
-#' @param k The number of nearest neighbours to use. The default is 3
-#' @param noise The amplitude of the random noise added to the expression values to break ties. Default value is 1e-09.
-#'
-#' @return A symmetric matrix of pairwise mutual information between the expression of pairs of genes. These are the mutual information estimtates between pairs of columns of \code{expr.data}.
-#'
-#' @export
-
-get.mim.knn <- function(expr.data, k=3, noise=1e-09) {
-  return(parmigene::knnmi.all(t(expr.data), k=k, noise=noise))
 }
 
 # Discretise expression data

@@ -1,7 +1,30 @@
+// MIT License
+
+// Copyright (c) 2018 Jonathan Ish-Horowicz
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 // ----------------------------------------------------------------------------------
 //  Implementations of the Mutual Information estimators using Maximum likelihood,
 //  Miller-Madow, Chao-Shen, Jack-knififed (unvalidated) and Shrinkage entropy 
-//  estimation (problem in joint entropy computation)
+//  estimation (problem in joint entropy computation). For references see 
+//  Ish-Horowicz and Reid, (2018)
 // ----------------------------------------------------------------------------------
 
 #include "fastGeneMI.h"
@@ -13,7 +36,6 @@ using namespace Rcpp;
 //  Estimators
 // ----------------------------------------------------------------------------------
 
-
 // Maximum likelihood mutual information
 
 // [[Rcpp::export]]
@@ -21,7 +43,7 @@ arma::mat mim_ML_cpp(NumericMatrix disc_expr_data, int n_cores)
 {
   arma::Mat<int> data = arma::conv_to<arma::Mat<int> >::from(R2armaMat_num(disc_expr_data));
   const int n_genes(data.n_cols), n_samples(data.n_rows);
-  const int n_pairs = (int)(((double)n_genes/2.0) * (double)(n_genes+1));
+  const int n_pairs = get_n_gene_pairs(n_genes);
 
   //Rcout << "There are " << n_genes << " genes and "
         //<< n_samples << " samples" << std::endl;
@@ -41,10 +63,7 @@ arma::mat mim_ML_cpp(NumericMatrix disc_expr_data, int n_cores)
     
   // Compute joint entropies in parallel
   //Rcout << "Computing joint entropies...";
-  const arma::Mat<int> idx_lookup = get_idx_lookup_mat(n_genes);
-  arma::mat p_joint;
   std::vector<double> h_joints(n_pairs); // Change to armadillo vector for returning to R
-  int i, j;
   
   // Number of cores to use
   // const int n_cores = sysconf(_SC_NPROCESSORS_ONLN);
@@ -52,26 +71,23 @@ arma::mat mim_ML_cpp(NumericMatrix disc_expr_data, int n_cores)
   
   //const int n_threads = omp_get_num_threads();
   //Rcout << "There are " << n_threads << " threads\n";
-  
-  #pragma omp parallel for shared(data, h_joints) private(i,j,p_joint) schedule(dynamic) default(none) collapse(2)
-  for(i=0; i<n_genes; ++i)
+
+  const std::vector<std::pair <int,int> > ij_pairs = get_ij_list(n_genes);
+
+  #pragma omp parallel for shared(data, h_joints)
+  for(int ij=0; ij<n_pairs; ++ij)
   {
-    for(j=0; j<n_genes; ++j)
-    {
-      if(i<=j)
-      {
-        int idx = idx_lookup(i,j);
-        p_joint = get_emp_joint_dist(data.col(i), data.col(j));
-        h_joints[idx] = get_joint_ml_entropy(p_joint);
-      }
-    }
+    std::pair <int,int> ij_pair = ij_pairs[ij];
+    int i(ij_pair.first), j(ij_pair.second);
+    arma::mat p_joint = get_emp_joint_dist(data.col(i), data.col(j));
+    h_joints[ij] = get_joint_ml_entropy(p_joint);
   }
   //Rcout << "done" << std::endl;
     
   // Compute mutual information
   //Rcout << "Computing mutual information...";
   arma::mat mim = arma::mat(n_genes, n_genes, arma::fill::zeros);
-  int ij(0);
+  int ij = 0;
   for(int i(0); i<n_genes; ++i)
   {
     for(int j(i); j<n_genes; ++j)
@@ -95,7 +111,7 @@ arma::mat mim_MM_cpp(NumericMatrix disc_expr_data, int n_cores)
 {
   arma::Mat<int> data = arma::conv_to<arma::Mat<int> >::from(R2armaMat_num(disc_expr_data));
   const int n_genes(data.n_cols), n_samples(data.n_rows);
-  const int n_pairs = (int)(((double)n_genes/2.0) * (double)(n_genes+1));
+  const int n_pairs = get_n_gene_pairs(n_genes);
 
   //Rcout << "There are " << n_genes << " genes and "
         //<< n_samples << " samples" << std::endl;
@@ -119,32 +135,23 @@ arma::mat mim_MM_cpp(NumericMatrix disc_expr_data, int n_cores)
   
   // Compute joint entropies in parallel
   //Rcout << "Computing joint entropies...";
-  arma::mat p_joint;
-  const arma::Mat<int> idx_lookup = get_idx_lookup_mat(n_genes);
   std::vector<double> h_joints(n_pairs);
-  int i, j;
   
   // Number of cores to use
   //const int n_cores = sysconf(_SC_NPROCESSORS_ONLN);
   omp_set_num_threads(n_cores);
-  
-  #pragma omp parallel for shared(data,h_joints) private(i,j,p_joint) schedule(dynamic) default(none) collapse(2)
-  for(i=0; i<n_genes; ++i)
+
+  const std::vector<std::pair <int,int> > ij_pairs = get_ij_list(n_genes);
+
+  #pragma omp parallel for shared(data, h_joints)
+  for(int ij=0; ij<n_pairs; ++ij)
   {
-    for(j=0; j<n_genes; ++j)
-    {
-      if(i<=j)
-      {
-        // Compute the Miller-Madow correction to the entropy
-        int idx = idx_lookup(i,j);
-        p_joint = get_emp_joint_dist(data.col(i), data.col(j));
-        int nonzero_bins = arma::size(arma::find(p_joint))(0);
-        double mm_corr = (double)(nonzero_bins - 1)/(2.0 * (double)n_samples);
-        
-        h_joints[idx] = get_joint_ml_entropy(p_joint) + mm_corr;
-      }
-      
-    }
+    std::pair <int,int> ij_pair = ij_pairs[ij];
+    int i(ij_pair.first), j(ij_pair.second);
+    arma::mat p_joint = get_emp_joint_dist(data.col(i), data.col(j));
+    int nonzero_bins = arma::size(arma::find(p_joint))(0);
+    double mm_corr = (double)(nonzero_bins - 1)/(2.0 * (double)n_samples);
+    h_joints[ij] = get_joint_ml_entropy(p_joint) + mm_corr;
   }
   //Rcout << "done" << std::endl;
   
@@ -162,6 +169,9 @@ arma::mat mim_MM_cpp(NumericMatrix disc_expr_data, int n_cores)
     }
   }
   //Rcout << "done" << std::endl;
+
+  // Zero negative values
+  mim.elem( find(mim < 0.0) ).fill(0.0);
   
   return mim;
 }
@@ -173,7 +183,7 @@ arma::mat mim_CS_cpp(NumericMatrix disc_expr_data, int n_cores)
 {
   arma::Mat<int> data = arma::conv_to<arma::Mat<int> >::from(R2armaMat_num(disc_expr_data));
   const int n_genes(data.n_cols), n_samples(data.n_rows);
-  const int n_pairs = (int)(((double)n_genes/2.0) * (double)(n_genes+1));
+  const int n_pairs = get_n_gene_pairs(n_genes);
 
   //Rcout << "There are " << n_genes << " genes and "
         //<< n_samples << " samples" << std::endl;
@@ -201,38 +211,31 @@ arma::mat mim_CS_cpp(NumericMatrix disc_expr_data, int n_cores)
     
   // Compute joint entropies in parallel
   //Rcout << "Computing joint entropies...";
-  const arma::Mat<int> idx_lookup = get_idx_lookup_mat(n_genes);
-  arma::mat p_joint;
   std::vector<double> h_joints(n_pairs);
-  int i, j;
   
   // Number of cores to use
   //const int n_cores = sysconf(_SC_NPROCESSORS_ONLN);
   omp_set_num_threads(n_cores);
   
-  #pragma omp parallel for shared(data,h_joints) private(i,j,p_joint) schedule(dynamic) default(none) collapse(2)
-  for(i=0; i<n_genes; ++i)
+  const std::vector<std::pair <int,int> > ij_pairs = get_ij_list(n_genes);
+
+  #pragma omp parallel for shared(data, h_joints)
+  for(int ij=0; ij<n_pairs; ++ij)
   {
-    for(j=0; j<n_genes; ++j)
-    {
-      if(i<=j)
-      {
-        // Get the number of bins with a single count
-        int idx = idx_lookup(i,j);
-        p_joint = get_emp_joint_dist(data.col(i), data.col(j));
-        int sing_count_bins = arma::size(arma::find(p_joint==1.0/(double)n_samples))(0);
-        double samp_cov = 1.0 - (double)sing_count_bins/(double)n_samples;
-        arma::mat cs_corr= 1.0/(1.0 - arma::pow(1.0-samp_cov*p_joint,n_samples));
+    std::pair <int,int> ij_pair = ij_pairs[ij];
+    int i(ij_pair.first), j(ij_pair.second);
+    arma::mat p_joint = get_emp_joint_dist(data.col(i), data.col(j));
+    int sing_count_bins = arma::size(arma::find(p_joint==1.0/(double)n_samples))(0);
+    double samp_cov = 1.0 - (double)sing_count_bins/(double)n_samples;
+    arma::mat cs_corr= 1.0/(1.0 - arma::pow(1.0-samp_cov*p_joint,n_samples));
         
-        // Set inf from divsion by zero to zero
-        cs_corr.elem(arma::find(cs_corr==arma::datum::inf)).zeros();
+    // Set inf from divsion by zero to zero
+    cs_corr.elem(arma::find(cs_corr==arma::datum::inf)).zeros();
         
-        arma::mat tmp = samp_cov*p_joint % arma::log(samp_cov*p_joint + 1e-16) % cs_corr;
-        h_joints[idx] = -arma::accu(tmp);
-      }
-      
-    }
+    arma::mat tmp = samp_cov*p_joint % arma::log(samp_cov*p_joint + 1e-16) % cs_corr;
+    h_joints[ij] = -arma::accu(tmp);
   }
+
   //Rcout << "done" << std::endl;
     
   // Compute mutual information
@@ -243,13 +246,13 @@ arma::mat mim_CS_cpp(NumericMatrix disc_expr_data, int n_cores)
   {
     for(int j(i); j<n_genes; ++j)
     {
-      mim(i,j) = h_marginals[i] + h_marginals[j] - h_joints[ij];
+      mim(i,j) = h_marginals  [i] + h_marginals[j] - h_joints[ij];
       mim(j,i) = mim(i,j);
       ++ij;
     }
   }
   //Rcout << "done" << std::endl;
-    
+
   return mim;
 }
 
@@ -260,7 +263,7 @@ arma::mat mim_shrink_cpp(NumericMatrix disc_expr_data, int n_cores)
 {
   arma::Mat<int> data = arma::conv_to<arma::Mat<int> >::from(R2armaMat_num(disc_expr_data));
   const int n_genes(data.n_cols), n_samples(data.n_rows);
-  const int n_pairs = (int)(((double)n_genes/2.0) * (double)(n_genes+1));
+  const int n_pairs = get_n_gene_pairs(n_genes);
   
   //Rcout << "There are " << n_genes << " genes and "
         //<< n_samples << " samples" << std::endl;
@@ -306,51 +309,43 @@ arma::mat mim_shrink_cpp(NumericMatrix disc_expr_data, int n_cores)
   // Compute joint entropies in parallel
   //Rcout << "Computing joint entropies...";
   std::vector<double> h_joints(n_pairs);
-  arma::mat p_joint, p_joint_shrink;
-  int i, j;
-  const arma::Mat<int> idx_lookup = get_idx_lookup_mat(n_genes);
   
   // Number of cores to use  int ij(0);
   //const int n_cores = sysconf(_SC_NPROCESSORS_ONLN);
   omp_set_num_threads(n_cores);
-  
-  #pragma omp parallel for shared(data,h_joints) private(i,j,p_joint,p_joint_shrink) schedule(dynamic) default(none) collapse(2)
-  for(i=0; i<n_genes; ++i)
+
+  const std::vector<std::pair <int,int> > ij_pairs = get_ij_list(n_genes);
+
+  #pragma omp parallel for shared(data, h_joints)
+  for(int ij=0; ij<n_pairs; ++ij)
   {
-    for(j=0; j<n_genes; ++j)
-    {
-      // Rcout << "i = " << i << " j = " << j << std::endl;
-      if(i<=j)
-      {
-        // Compute the shrinkage intensity lambda
-        int idx = idx_lookup(i,j);
-        p_joint = get_emp_joint_dist(data.col(i), data.col(j));
-        //Rcout << "p_joint = \n" << p_joint << std::endl;
-        double n_bins = (double)p_joint.n_elem;
-        double lambda_numer = 1.0 - arma::accu(arma::pow(p_joint, 2.0));
-        double lambda_denom = (double)(n_samples-1) *
+    std::pair <int,int> ij_pair = ij_pairs[ij];
+    int i(ij_pair.first), j(ij_pair.second);
+    arma::mat p_joint = get_emp_joint_dist(data.col(i), data.col(j));
+    //Rcout << "p_joint = \n" << p_joint << std::endl;
+    double n_bins = (double)p_joint.n_elem;
+    double lambda_numer = 1.0 - arma::accu(arma::pow(p_joint, 2.0));
+    double lambda_denom = (double)(n_samples-1) *
           arma::accu(arma::pow(1.0/n_bins - p_joint, 2.0));
         
-        double lambda;
-        if(lambda_denom==0)
-          lambda = 0;
-        else
-          lambda = lambda_numer/lambda_denom;
+    double lambda;
+    if(lambda_denom==0)
+      lambda = 0;
+    else
+      lambda = lambda_numer/lambda_denom;
         
-        // Lambda must be between 0 and 1
-        if(lambda < 0.0)
-          lambda = 0.0;
-        else if(lambda > 1)
-          lambda = 1.0;
+    // Lambda must be between 0 and 1
+    if(lambda < 0.0)
+      lambda = 0.0;
+    else if(lambda > 1)
+      lambda = 1.0;
         
-        //Rcout << "lambda = " << lambda << std::endl;
+    //Rcout << "lambda = " << lambda << std::endl;
         
-        // Note: the target distribution is uniform
-        p_joint_shrink = lambda * (1.0/n_bins) + (1.0-lambda) * p_joint;
-        //Rcout << "p_j_shrink = \n" << p_joint_shrink << std::endl;
-        h_joints[idx] = get_joint_ml_entropy(p_joint_shrink);
-      }
-    }
+    // Note: the target distribution is uniform
+    arma::mat p_joint_shrink = lambda * (1.0/n_bins) + (1.0-lambda) * p_joint;
+    //Rcout << "p_j_shrink = \n" << p_joint_shrink << std::endl;
+    h_joints[ij] = get_joint_ml_entropy(p_joint_shrink);
   }
   //Rcout << "done" << std::endl;
   
