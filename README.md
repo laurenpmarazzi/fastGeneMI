@@ -20,6 +20,6 @@ The following estimators are implemented:
 * Shrinkage
 * B-spline
 
-Also included are the inference algorithms CLR, MRNET and ARACNe (see https://www.biorxiv.org/content/early/2017/07/26/132647 for references), as well as functions to evaluate their predictions using precision-recall curves.
+Also included are the inference algorithms CLR, MRNET and ARACNe, as well as functions to evaluate their predictions using precision-recall curves. Included data is from the DREAM5 Network Inference Challenge. See accompanying paper at https://www.biorxiv.org/content/early/2017/07/26/132647 for references.
 
 Full documentation is available in fastGeneMI-manual.pdf
