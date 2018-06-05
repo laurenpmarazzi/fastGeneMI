@@ -17,8 +17,9 @@ The following estimators are implemented:
 * Maximum Likelihood
 * Chao-Shen
 * Miller-Madow
+* Shrinkage
 * B-spline
 
-Also included are the inference algorithms CLR, MRNET and ARACNe (see https://www.biorxiv.org/content/early/2017/07/26/132647 for references).
+Also included are the inference algorithms CLR, MRNET and ARACNe (see https://www.biorxiv.org/content/early/2017/07/26/132647 for references), as well as functions to evaluate their predictions using precision-recall curves.
 
 Full documentation is available in fastGeneMI-manual.pdf
