@@ -2,7 +2,7 @@
 
 ## Installation
 
-Requires `devtools`. Insatll from the R command line using
+Requires `devtools`. Install from R using
 
 ```devtools::install_bitbucket('Jonathan-Ish-Horowicz/fastGeneMI')```.
 
