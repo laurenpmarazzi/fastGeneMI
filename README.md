@@ -8,9 +8,9 @@ Requires `devtools`. Install from R using
 
 ## Features
 
-`fastGeneMI` is implements a suite of mutual information estimators in parallised C++ with an R interface.
+`fastGeneMI` is a package that implements a suite of mutual information estimators in parallelised C++ with an R interface.
 
-These were implemented for inferring gene regulatory networks from DNA microarrays, but are suitable for any continuous data.
+These were implemented for inferring gene regulatory networks from DNA microarrays but are suitable for any continuous data.
 
 The following estimators are implemented:
 
