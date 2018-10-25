@@ -1,28 +1,5 @@
-// MIT License
-
-// Copyright (c) 2018 Jonathan Ish-Horowicz
-
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
-
 // ----------------------------------------------------------------------------------
-//  C++ port of the (basic) Bayesian Blocks algorithm - Scargle et al (2012)
+//  Rcpp port of the (basic) Bayesian Blocks algorithm - Scargle et al (2012)
 // ----------------------------------------------------------------------------------
 
 #include "fastGeneMI.h"
@@ -50,14 +27,10 @@ arma::vec get_bb_bin_edges(const arma::vec& expr_prof)
 {
   // Change R objects to armadillo objects
   int n_samples(expr_prof.n_rows);
-
-  //Rcout << "t = " << t.t() << std::endl;
   
   arma::uvec unq_inds = arma::find_unique(expr_prof, false);
   arma::vec unq_vals = expr_prof.elem(unq_inds);
   int n_unq_vals(unq_inds.n_rows);
-  //Rcout << "Unique values are " << unq_vals.t() << std::endl;
-  //Rcout << "Unique indices are " << unq_inds.t() << std::endl;
   
   arma::uvec unq_inv = arma::uvec(n_samples);
   
@@ -65,9 +38,7 @@ arma::vec get_bb_bin_edges(const arma::vec& expr_prof)
   {
     unq_inv(i) = arma::as_scalar(arma::find(unq_vals==expr_prof[i]));
   }
-  
-  //Rcout << "Unique inverse is " << unq_inv.t() << std::endl;
-  
+    
   arma::uvec x = arma::uvec(n_unq_vals, arma::fill::zeros);
   
   if(n_samples==n_unq_vals)
@@ -83,68 +54,43 @@ arma::vec get_bb_bin_edges(const arma::vec& expr_prof)
   }
   arma::vec t = unq_vals;
   double sigma(1.0);
-  
-  //Rcout << "t = " << t.t() << std::endl;
-  //Rcout << "x = " << x.t() << std::endl;
-  
+
   int N(t.n_rows);
   
   arma::vec edges = arma::join_cols(t.row(0),
                                     0.5 * (t.rows(1,N-1) + t.rows(0, N-2)));
   edges = arma::join_cols(edges, t.row(N-1));
   
-  //Rcout << "edges = " << edges.t() << std::endl;
-  
   arma::vec block_length = t(N-1) - edges;
-  
-  //Rcout << "block length = " << block_length.t() << std::endl;
-  
+    
   // To store best configuration
   arma::vec best = arma::vec(N, arma::fill::zeros);
   arma::Col<int> last = arma::Col<int>(N, arma::fill::zeros);
-  
-  //Rcout << "best = " << best.t() << std::endl;
-  
+    
   // Start with first data cell; add one cell at each iteration
   
   for(int R(0); R<N; ++R)
   {
-    //Rcout << "R=" << R << std::endl;
     arma::vec T_k = block_length.rows(0,R) - block_length[R+1];
-    //Rcout << "T_k = " << T_k.t() << std::endl;
     
     arma::uvec N_k = arma::flipud(arma::cumsum(arma::flipud(x.rows(0,R))));
-    
-    //Rcout << "N_k = " << N_k.t() << std::endl;
-    
+        
     // Evaluate fitness function
     arma::vec fit_vec = fitness(N_k, T_k);
-    //Rcout << "fit_vec = " << fit_vec.t() << std::endl;
     
     arma::vec A_R = fit_vec - prior(R+1, N);
-    //Rcout << "A_R.rows(1,A_R.n_rows-1) = " << A_R.rows(1,A_R.n_rows-1) << std::endl;
-    //Rcout << "best.rows(0,R-1) = " << best.rows(0,R-1) << std::endl;
     if(R==0)
     {
       A_R[0] += best[0];
     }
     else
       A_R.rows(1,A_R.n_rows-1) += best.rows(0,R-1);
-    
-    //Rcout << "A_R = " << A_R.t() << std::endl;
-    
+        
     int i_max = arma::index_max(A_R);
     last(R) = i_max;
     best(R) = A_R(i_max);
     
-    //Rcout << "i_max = " << i_max << std::endl;
-    
-    //Rcout << "\n\n" << std::endl;
-  }
-  
-  //Rcout << "best = " << best.t() << std::endl;
-  //Rcout << "last = " << last.t() << std::endl;
-  
+  }  
   // Now find changepoints by iteratively peeling off the last block
   arma::Col<int> change_points = arma::Col<int>(N, arma::fill::zeros);
   int i_cp(N), ind(N);
@@ -160,22 +106,18 @@ arma::vec get_bb_bin_edges(const arma::vec& expr_prof)
   arma::Col<int> change_points_new = change_points.rows(i_cp, change_points.n_rows-1);
   arma::uvec cp_idxs = arma::conv_to<arma::uvec>::from(change_points_new);
   
-  //Rcout << "i_cp = " << i_cp << "\tind = " << ind << std::endl;
-  //Rcout << "change_points_new = " << change_points_new.t() << std::endl;
-  
   return edges.elem(cp_idxs);
 }
 
 // Discretise a dataset using Bayesian Blocks algorithm
 // [[Rcpp::export]]
-arma::Mat<int> disc_dataset_bb_cpp(NumericMatrix expr_data, const int n_cores)
+arma::Mat<int> disc_dataset_bb_cpp(const arma::mat& expr_data, const int n_cores)
 {
-  const arma::mat data = R2armaMat_num(expr_data);
+  const arma::mat data = expr_data - 1.0;
   const int n_genes(data.n_cols), n_samples(data.n_rows);
   
   // Compute bin edges for each gene in parallel
-  arma::Mat<int> disc_data = arma::Mat<int>(arma::size(data),
-                                            arma::fill::zeros);
+  arma::Mat<int> disc_data = arma::Mat<int>(arma::size(data), arma::fill::zeros);
   
   // Number of cores to use
   omp_set_num_threads(n_cores);
@@ -201,10 +143,9 @@ arma::Mat<int> disc_dataset_bb_cpp(NumericMatrix expr_data, const int n_cores)
 
 // Returns the Bayesian Block bin edges for a single gene
 // [[Rcpp::export]]
-arma::vec get_bb_bin_edges_cpp(NumericVector expr_prof)
+arma::vec get_bb_bin_edges_cpp(const arma::vec& expr_prof)
 {
-  const arma::vec data = R2armaVec_num(expr_prof);
-  const int n_samples(data.n_rows);
+  const arma::vec data = expr_prof - 1.0;
   return get_bb_bin_edges(data);
 }
 

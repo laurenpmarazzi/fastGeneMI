@@ -1,25 +1,3 @@
-// MIT License
-
-// Copyright (c) 2018 Jonathan Ish-Horowicz
-
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
 // ----------------------------------------------------------------------------------
 //  Implementation of the B-spline Mutual information estimation method
 // ----------------------------------------------------------------------------------
@@ -165,11 +143,9 @@ arma::vec get_knots(const int k, const int n_bins)
 // Compute the mutual information matrix of expression data using the B-spline method using 
 // splines of order k
 // [[Rcpp::export]]
-arma::mat mim_bspline_cpp(NumericMatrix expr_data, const int k, const int n_bins, const int n_cores)
+arma::mat mim_bspline_cpp(const arma::mat& expr_data, const int k, const int n_bins, const int n_cores)
 {
-  // Convert arguments to Armadillo objects
-  const arma::mat data = R2armaMat_num(expr_data); // Continuous data does not need reindexing R->C++
-  const int n_genes(data.n_cols), n_samples(data.n_rows);
+  const int n_genes(expr_data.n_cols), n_samples(expr_data.n_rows);
   const int n_pairs = get_n_gene_pairs(n_genes);
   const arma::vec t = get_knots(k, n_bins);
   
@@ -180,6 +156,7 @@ arma::mat mim_bspline_cpp(NumericMatrix expr_data, const int k, const int n_bins
   //const int n_cores = sysconf(_SC_NPROCESSORS_ONLN);
   omp_set_num_threads(n_cores);
   
+  const arma::mat data = expr_data;
   std::vector<arma::sp_mat> bspl_coeffs(n_genes);
   #pragma omp parallel for shared(bspl_coeffs) schedule(auto) default(none)
   for(int j=0; j<n_genes; ++j)
@@ -190,11 +167,10 @@ arma::mat mim_bspline_cpp(NumericMatrix expr_data, const int k, const int n_bins
   //Rcout << "Got bspline coefficients\n";
   
   // Compute marginal probabilities and entropies
-  arma::vec p_marginal;
   std::vector<double> h_marginals(n_genes);
   for(int j(0); j<n_genes; ++j)
   {
-    p_marginal = arma::vec(arma::trans(arma::sum(bspl_coeffs[j], 0)/(double)n_samples));
+    arma::vec p_marginal = arma::vec(arma::trans(arma::sum(bspl_coeffs[j], 0)/(double)n_samples));
     h_marginals[j] = -arma::sum(p_marginal % arma::log(p_marginal + 1e-16));
   }
   

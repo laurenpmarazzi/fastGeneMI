@@ -1,25 +1,3 @@
-// MIT License
-
-// Copyright (c) 2018 Jonathan Ish-Horowicz
-
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
 // ----------------------------------------------------------------------------------
 //  Utility functions
 // ----------------------------------------------------------------------------------
@@ -27,24 +5,6 @@
 #include "fastGeneMI.h"
 
 using namespace Rcpp;
-
-// ----------------------------------------------------------------------------------
-//  For converting between R and C++/Armadillo objects
-// ----------------------------------------------------------------------------------
-
-// Convert a NumericMatrix (R object) to an Armadillo matrix (C++ object)
-arma::mat R2armaMat_num(NumericMatrix rMat)
-{
-  arma::mat armaMat = arma::mat(rMat.begin(), rMat.nrow(), rMat.ncol(), false);
-  return armaMat;
-}
-
-// Convert a NumericVector (R object) to an Armadillo vector (C++ object)
-arma::vec R2armaVec_num(NumericVector rVec)
-{
-  arma::vec armaVec = arma::vec(rVec.begin(), rVec.length(), false);
-  return armaVec;
-}
 
 // ----------------------------------------------------------------------------------
 //  Maximum Likelihood Entropy functions
