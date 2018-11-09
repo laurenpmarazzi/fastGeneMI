@@ -60,7 +60,8 @@ get.pr <- function(mim, gs.net, inf.algo=c("clr", "mrnet", "aracne"), n.reg=NULL
   # Compute precision, recall and AUPR
   pr.curve <- PRROC::pr.curve(
     scores.class0 = preds,
-    weights.class0 = labels
+    weights.class0 = labels,
+    curve = TRUE
   )
   
   res <- list("pr" = pr.curve$curve,
