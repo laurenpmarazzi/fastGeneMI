@@ -1,5 +1,6 @@
 #ifndef __FAST_MINET__
 #define __FAST_MINET__
+#define ARMA_NO_DEBUG
 
 #define _USE_MATH_DEFINES
 
