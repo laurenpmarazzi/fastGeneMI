@@ -1,5 +1,14 @@
 # fastGeneMI: an R package for computing the mutual information between the expression profiles of genes in a microarray #
 
+## Requirements
+
+* Rcpp 
+* RcppArmadillo
+* infotheo
+* PRROC
+* minet
+* testthat
+
 ## Installation
 
 Requires `devtools`. Install from R using
