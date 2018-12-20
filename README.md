@@ -2,7 +2,7 @@
 
 ## Requirements
 
-The following R packacges (CRAN unless otherwise stated)
+The following R packacges are required (available on CRAN unless otherwise stated):
 
 * Rcpp 
 * RcppArmadillo
