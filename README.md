@@ -4,7 +4,7 @@
 
 Requires `devtools`. Install from R using
 
-```devtools::install_bitbucket('Jonathan-Ish-Horowicz/fastGeneMI')```.
+```devtools::install_github("jonathanishhorowicz/fastGeneMI")```.
 
 ## Features
 
