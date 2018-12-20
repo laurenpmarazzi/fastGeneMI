@@ -1,6 +1,7 @@
 #ifndef __FAST_MINET__
 #define __FAST_MINET__
 #define ARMA_NO_DEBUG
+
 #define _USE_MATH_DEFINES
 
 #include <RcppArmadillo.h>
@@ -17,30 +18,24 @@
 using namespace Rcpp;
 
 // In disc_mi_estimators.cpp
-arma::mat mim_ML_cpp(NumericMatrix disc_expr_data);
-arma::mat mim_MM_cpp(NumericMatrix disc_expr_data);
-arma::mat mim_CS_cpp(NumericMatrix disc_expr_data);
-arma::mat mim_shrink_cpp(NumericMatrix disc_expr_data);
-
-// In jackknife.cpp
-arma::vec remove_sample_marg(const arma::vec& p_marg, const int n_samples, const int sample_val);
-arma::mat remove_sample_joint(const arma::mat& p_joint, const int n_samples,
-                              const int sample_val_i, const int sample_val_j);
-arma::mat mim_JK_cpp(NumericMatrix disc_expr_data);
+arma::mat mim_ML_cpp(const arma::mat& disc_expr_data);
+arma::mat mim_MM_cpp(const arma::mat& disc_expr_data);
+arma::mat mim_CS_cpp(const arma::mat& disc_expr_data);
+arma::mat mim_shrink_cpp(const arma::mat& disc_expr_data);
 
 // In bayesian_blocks.cpp
 arma::vec fitness(const arma::uvec& N_k, const arma::vec& T_k);
 double prior(const int N, const int Ntot);
 arma::vec get_bb_bin_edges(const arma::vec& expr_prof);
-arma::Mat<int> disc_dataset_bb_cpp(NumericMatrix expr_data);
-arma::vec get_bb_bin_edges_cpp(NumericVector expr_prof);
+arma::Mat<int> disc_dataset_bb_cpp(const arma::mat& expr_data);
+arma::vec get_bb_bin_edges_cpp(const arma::vec& expr_prof);
 
 // In emprical_dist_getters.cpp
 arma::vec get_emp_marg_dist(const arma::Mat<int>& disc_data);
 arma::mat get_emp_joint_dist(const arma::Mat<int>& disc_data_col_i, const arma::Mat<int>& disc_data_col_j);
 
 // In bspline_mi.cpp
-arma::mat mim_bspline_cpp(NumericMatrix expr_data, const int order, NumericVector nbins);
+arma::mat mim_bspline_cpp(const arma::mat& expr_data, const int order, NumericVector nbins);
 
 class Bspline {
   
@@ -62,9 +57,6 @@ private:
 };
 
 // In util_funcs.cpp
-arma::mat R2armaMat_num(NumericMatrix rMat);
-arma::vec R2armaVec_num(NumericVector rVec);
-int rNumVec2int(NumericVector rVec);
 double get_marginal_ml_entropy(const arma::vec& p_marg);
 double get_joint_ml_entropy(const arma::mat& p_joint);
 int get_n_gene_pairs(const int n_genes);

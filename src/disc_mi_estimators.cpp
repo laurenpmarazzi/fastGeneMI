@@ -24,7 +24,7 @@
 //  Implementations of the Mutual Information estimators using Maximum likelihood,
 //  Miller-Madow, Chao-Shen, Jack-knififed (unvalidated) and Shrinkage entropy 
 //  estimation (problem in joint entropy computation). For references see 
-//  Ish-Horowicz and Reid, (2018)
+//  documentation
 // ----------------------------------------------------------------------------------
 
 #include "fastGeneMI.h"
@@ -39,17 +39,14 @@ using namespace Rcpp;
 // Maximum likelihood mutual information
 
 // [[Rcpp::export]]
-arma::mat mim_ML_cpp(NumericMatrix disc_expr_data, int n_cores)
+arma::mat mim_ML_cpp(const arma::mat& disc_expr_data, int n_cores)
 {
-  arma::Mat<int> data = arma::conv_to<arma::Mat<int> >::from(R2armaMat_num(disc_expr_data));
+  const arma::Mat<int> data = arma::conv_to<arma::Mat<int> >::from(disc_expr_data - 1.0);
   const int n_genes(data.n_cols), n_samples(data.n_rows);
   const int n_pairs = get_n_gene_pairs(n_genes);
 
   //Rcout << "There are " << n_genes << " genes and "
         //<< n_samples << " samples" << std::endl;
-  
-  // Change from R indexing to C++ indexing
-  data -= 1;
   
   // Compute marginal entropies
   //Rcout << "Computing marginal entropies...";
@@ -74,7 +71,7 @@ arma::mat mim_ML_cpp(NumericMatrix disc_expr_data, int n_cores)
 
   const std::vector<std::pair <int,int> > ij_pairs = get_ij_list(n_genes);
 
-  #pragma omp parallel for shared(data, h_joints)
+  #pragma omp parallel for shared(h_joints)
   for(int ij=0; ij<n_pairs; ++ij)
   {
     std::pair <int,int> ij_pair = ij_pairs[ij];
@@ -107,18 +104,12 @@ arma::mat mim_ML_cpp(NumericMatrix disc_expr_data, int n_cores)
 // Miller-Madow bias correction
 
 // [[Rcpp::export]]
-arma::mat mim_MM_cpp(NumericMatrix disc_expr_data, int n_cores)
+arma::mat mim_MM_cpp(const arma::mat& disc_expr_data, int n_cores)
 {
-  arma::Mat<int> data = arma::conv_to<arma::Mat<int> >::from(R2armaMat_num(disc_expr_data));
+  const arma::Mat<int> data = arma::conv_to<arma::Mat<int> >::from(disc_expr_data - 1.0);
   const int n_genes(data.n_cols), n_samples(data.n_rows);
   const int n_pairs = get_n_gene_pairs(n_genes);
 
-  //Rcout << "There are " << n_genes << " genes and "
-        //<< n_samples << " samples" << std::endl;
-  
-  // Change from R indexing to C++ indexing
-  data -= 1;
-  
   // Compute marginal entropies
   //Rcout << "Computing marginal entropies...";
   std::vector<double> h_marginals(n_genes);
@@ -143,7 +134,7 @@ arma::mat mim_MM_cpp(NumericMatrix disc_expr_data, int n_cores)
 
   const std::vector<std::pair <int,int> > ij_pairs = get_ij_list(n_genes);
 
-  #pragma omp parallel for shared(data, h_joints)
+  #pragma omp parallel for shared(h_joints)
   for(int ij=0; ij<n_pairs; ++ij)
   {
     std::pair <int,int> ij_pair = ij_pairs[ij];
@@ -179,17 +170,11 @@ arma::mat mim_MM_cpp(NumericMatrix disc_expr_data, int n_cores)
 
 // Chao-Shen Estimator
 // [[Rcpp::export]]
-arma::mat mim_CS_cpp(NumericMatrix disc_expr_data, int n_cores)
+arma::mat mim_CS_cpp(const arma::mat& disc_expr_data, int n_cores)
 {
-  arma::Mat<int> data = arma::conv_to<arma::Mat<int> >::from(R2armaMat_num(disc_expr_data));
+  const arma::Mat<int> data = arma::conv_to<arma::Mat<int> >::from(disc_expr_data - 1.0);
   const int n_genes(data.n_cols), n_samples(data.n_rows);
   const int n_pairs = get_n_gene_pairs(n_genes);
-
-  //Rcout << "There are " << n_genes << " genes and "
-        //<< n_samples << " samples" << std::endl;
-    
-  // Change from R indexing to C++ indexing
-  data -= 1;
     
   // Compute marginal entropies
   //Rcout << "Computing marginal entropies...";
@@ -219,7 +204,7 @@ arma::mat mim_CS_cpp(NumericMatrix disc_expr_data, int n_cores)
   
   const std::vector<std::pair <int,int> > ij_pairs = get_ij_list(n_genes);
 
-  #pragma omp parallel for shared(data, h_joints)
+  #pragma omp parallel for shared(h_joints)
   for(int ij=0; ij<n_pairs; ++ij)
   {
     std::pair <int,int> ij_pair = ij_pairs[ij];
@@ -259,18 +244,12 @@ arma::mat mim_CS_cpp(NumericMatrix disc_expr_data, int n_cores)
 
 // Shrinkage estimator
 // [[Rcpp::export]]
-arma::mat mim_shrink_cpp(NumericMatrix disc_expr_data, int n_cores)
+arma::mat mim_shrink_cpp(const arma::mat& disc_expr_data, int n_cores)
 {
-  arma::Mat<int> data = arma::conv_to<arma::Mat<int> >::from(R2armaMat_num(disc_expr_data));
+  const arma::Mat<int> data = arma::conv_to<arma::Mat<int> >::from(disc_expr_data - 1.0);   // Change from R indexing to C++ indexing
   const int n_genes(data.n_cols), n_samples(data.n_rows);
   const int n_pairs = get_n_gene_pairs(n_genes);
-  
-  //Rcout << "There are " << n_genes << " genes and "
-        //<< n_samples << " samples" << std::endl;
-  
-  // Change from R indexing to C++ indexing
-  data -= 1;
-  
+    
   // Compute marginal entropies
   //Rcout << "Computing marginal entropies...";
   std::vector<double> h_marginals(n_genes);
@@ -316,7 +295,7 @@ arma::mat mim_shrink_cpp(NumericMatrix disc_expr_data, int n_cores)
 
   const std::vector<std::pair <int,int> > ij_pairs = get_ij_list(n_genes);
 
-  #pragma omp parallel for shared(data, h_joints)
+  #pragma omp parallel for shared(h_joints)
   for(int ij=0; ij<n_pairs; ++ij)
   {
     std::pair <int,int> ij_pair = ij_pairs[ij];
@@ -329,8 +308,8 @@ arma::mat mim_shrink_cpp(NumericMatrix disc_expr_data, int n_cores)
           arma::accu(arma::pow(1.0/n_bins - p_joint, 2.0));
         
     double lambda;
-    if(lambda_denom==0)
-      lambda = 0;
+    if(lambda_denom==0.0)
+      lambda = 0.0;
     else
       lambda = lambda_numer/lambda_denom;
         
@@ -348,7 +327,7 @@ arma::mat mim_shrink_cpp(NumericMatrix disc_expr_data, int n_cores)
     h_joints[ij] = get_joint_ml_entropy(p_joint_shrink);
   }
   //Rcout << "done" << std::endl;
-  
+
   // Compute mutual information
   //Rcout << "Computing mutual information...";
   arma::mat mim = arma::mat(n_genes, n_genes, arma::fill::zeros);

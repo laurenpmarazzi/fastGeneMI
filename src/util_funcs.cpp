@@ -29,24 +29,6 @@
 using namespace Rcpp;
 
 // ----------------------------------------------------------------------------------
-//  For converting between R and C++/Armadillo objects
-// ----------------------------------------------------------------------------------
-
-// Convert a NumericMatrix (R object) to an Armadillo matrix (C++ object)
-arma::mat R2armaMat_num(NumericMatrix rMat)
-{
-  arma::mat armaMat = arma::mat(rMat.begin(), rMat.nrow(), rMat.ncol(), false);
-  return armaMat;
-}
-
-// Convert a NumericVector (R object) to an Armadillo vector (C++ object)
-arma::vec R2armaVec_num(NumericVector rVec)
-{
-  arma::vec armaVec = arma::vec(rVec.begin(), rVec.length(), false);
-  return armaVec;
-}
-
-// ----------------------------------------------------------------------------------
 //  Maximum Likelihood Entropy functions
 // ----------------------------------------------------------------------------------
 
