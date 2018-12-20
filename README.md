@@ -1,3 +1,5 @@
+# Note - active development has been moved to https://github.com/jonathanishhorowicz/fastGeneMI
+
 # fastGeneMI: an R package for computing the mutual information between the expression profiles of genes in a microarray #
 
 ## Installation
