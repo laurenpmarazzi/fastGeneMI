@@ -28,9 +28,24 @@
 #' @param inf.algo The inference algorithm used to infer the network from the mutual information estimates. Must be one of \code{"clr"}, \code{"mrnet"} or \code{"aracne"}. Default is \code{"CLR"}.
 #' @param gs.net The symmetric adjacency matrix of the gold standard regulatory network. Should contain a 0 for no edge, 1 for an edge and \code{NA} if unknown. Note that unknown edges are not included in the evaluation.
 #' @param n.reg The number of genes that are designated as potential regulators. If it is an integer then the first \code{n.reg} genes are marked as regulators. If a vector then those gene indexes contained in the vector are regulators. Only interactions involving regulators are used to compute the precision and recall. Default is \code{NULL}, in which case all the genes are potential regulators (note that this is typically not the biological reality).
-#' @param plot Logical controlling whether or not to return the precision-recall curve.
+#' @param plot.pr Logical controlling whether or not to return the precision-recall curve.
 #'
-#' @return \item{network}{The inferred regulatory network. A matrix whose \eqn{ij^{th}} element represents the confidence of an edge between genes \eqn{i} and \eqn{j}.} \item{pr}{A two-column matrix of the precision and recall values of the precision-recall curve resulting from evaluating the inferred network against a gold standard. The first column contains the recall and the second column contains the precision. Only returned if a gold standard network is provided.} \item{auprc}{The area under the precision-recall curve. Only returned if a gold standard network is provided.} \item{plot}{The precision-recall curve.}
+#' @return \item{network}{The inferred regulatory network. A matrix whose \eqn{ij^{th}} element represents the confidence of an edge between genes \eqn{i} and \eqn{j}.} \item{pr}{A two-column matrix of the precision and recall values of the precision-recall curve resulting from evaluating the inferred network against a gold standard. The first column contains the recall and the second column contains the precision. Only returned if a gold standard network is provided.} \item{auprc}{The area under the precision-recall curve. Only returned if a gold standard network is provided.} \item{plot}{The precision-recall curve (if \code{plot.pr=TRUE}).}
+#'
+#' @examples
+#' # Compute the mutual information matrix for the variables in the 
+#' # iris dataset using default discretisation parameters
+#' # (N^1/3 equal width bins for N samples). Computation is performed
+#' # sequentially be default (i.e. using a single core)
+#' data("iris")
+#' expr.data <- iris[,1:4]
+#' mim <- get.mim.ML(expr.data, "equalwidth")
+#' # Now use N^1/2 bins and use 2 cores
+#' mim <- get.mim.ML(expr.data, "equalwidth", as.integer(nrow(expr.data)^0.5),
+#'                    n.cores=2)
+#' # Infer the network without a gold standard - no precision recall curve will
+#' # be returned since evalatuaion requires a gold standard
+#' net <- infer.net(mim, "clr")
 #'
 #' @references Faith, J.J. et al, 2007. Large-scale mapping and validation of Escherichia coli transcriptional regulation from a compendium of expression profiles. PLoS Biology, 5(1), p.e8.
 #' @references Meyer, P.E. et al, 2007. Information-theoretic inference of large transcriptional regulatory networks. EURASIP Journal on Bioinformatics and Systems Biology, 2007, pp.8-8.
@@ -39,7 +54,7 @@
 #'
 #' @export
 
-infer.net <- function(mim, inf.algo=c("clr", "mrnet", "aracne"), gs.net=NULL, n.reg=NULL, plot=FALSE)
+infer.net <- function(mim, inf.algo=c("clr", "mrnet", "aracne"), gs.net=NULL, n.reg=NULL, plot.pr=FALSE)
 {
   # Infer network
   inf.algo <- match.arg(inf.algo)
@@ -101,10 +116,17 @@ infer.net <- function(mim, inf.algo=c("clr", "mrnet", "aracne"), gs.net=NULL, n.
       curve = TRUE
     )
     
+    
+    if(plot.pr)
+      plt <- plot(pr.curve)
+    else
+      plt <- NULL
+    
+    
     return(list(network = network,
                 pr = pr.curve$curve,
                 auprc = pr.curve$auc.davis.goadrich,
-                plot = plot(pr.curve)))
+                plot = plt))
   }
 }
 
