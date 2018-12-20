@@ -12,7 +12,7 @@ Description: Provides implementations of several mutual information estimators
 Depends: R (>= 2.10)
 License: MIT + file LICENSE
 LazyData: true
-Imports: Rcpp (>= 0.12.9), infotheo, precrec, minet, testthat, ggplot2
+Imports: Rcpp (>= 0.12.9), infotheo, PRROC, minet, testthat
 Suggests: Rdpack
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 6.0.1

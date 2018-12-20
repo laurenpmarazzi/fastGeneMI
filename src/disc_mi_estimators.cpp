@@ -286,8 +286,8 @@ arma::mat mim_shrink_cpp(const arma::mat& disc_expr_data, int n_cores)
           arma::accu(arma::pow(1.0/n_bins - p_joint, 2.0));
         
     double lambda;
-    if(lambda_denom==0)
-      lambda = 0;
+    if(lambda_denom==0.0)
+      lambda = 0.0;
     else
       lambda = lambda_numer/lambda_denom;
         
@@ -305,7 +305,7 @@ arma::mat mim_shrink_cpp(const arma::mat& disc_expr_data, int n_cores)
     h_joints[ij] = get_joint_ml_entropy(p_joint_shrink);
   }
   //Rcout << "done" << std::endl;
-  
+
   // Compute mutual information
   //Rcout << "Computing mutual information...";
   arma::mat mim = arma::mat(n_genes, n_genes, arma::fill::zeros);
