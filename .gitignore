@@ -2,3 +2,4 @@ src/*.o
 src/*.so
 man/
 .Rhistory
+R/.Rhistory
