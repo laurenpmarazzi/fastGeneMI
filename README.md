@@ -2,11 +2,13 @@
 
 ## Requirements
 
+The following R packacges (CRAN unless otherwise stated)
+
 * Rcpp 
 * RcppArmadillo
 * infotheo
 * PRROC
-* minet
+* minet (bioconductor)
 * testthat
 
 ## Installation
