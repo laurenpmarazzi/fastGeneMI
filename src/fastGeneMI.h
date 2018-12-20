@@ -5,7 +5,6 @@
 #define _USE_MATH_DEFINES
 
 #include <RcppArmadillo.h>
-// [[Rcpp::depends(RcppArmadillo)]]
 #include <vector>
 #include <string>
 #include <cmath>
