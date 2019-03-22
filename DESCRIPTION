@@ -3,7 +3,7 @@ Type: Package
 Title: A Suite of Mutual Information Estimators for Gene Regulatory Network
   Inference from Microarray Expression Data
 Version: 1.0
-Date: 2018-09-12
+Date: 2019-03-22
 Author: Jonathan Ish-Horowicz
 Maintainer: Jonathan Ish-Horowicz <jonathan.ish-horowicz17@imperial.ac.uk>
 Description: Provides implementations of several mutual information estimators
