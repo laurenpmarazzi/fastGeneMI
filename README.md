@@ -8,7 +8,7 @@ The following R packacges are required (available on CRAN unless otherwise state
 * RcppArmadillo
 * infotheo
 * PRROC
-* minet (bioconductor)
+* minet (Bioconductor)
 * testthat
 
 ## Installation
@@ -31,6 +31,8 @@ The following estimators are implemented:
 * Shrinkage
 * B-spline
 
-Also included are the inference algorithms CLR, MRNET and ARACNe, as well as functions to evaluate their predictions using precision-recall curves. Included data is from the DREAM5 Network Inference Challenge. See the Supplementary Material of the accompanying paper at https://www.biorxiv.org/content/early/2017/07/26/132647 for descriptions of each estimator.
+Also included are the inference algorithms CLR, MRNET and ARACNe, as well as functions to evaluate their predictions using precision-recall curves. Included data is from the DREAM5 Network Inference Challenge. See the Supplementary Material of [Ish-Horowicz and Reid, 2017](https://www.biorxiv.org/content/early/2017/07/26/132647) for more detailed descriptions of each estimator.
+
+## Documentation
 
 Full documentation is available in fastGeneMI-manual.pdf
