@@ -35,4 +35,4 @@ Also included are the inference algorithms CLR, MRNET and ARACNe, as well as fun
 
 ## Documentation
 
-Full documentation is available in fastGeneMI-manual.pdf
+Full documentation is available in [fastGeneMI-manual.pdf](fastGeneMI-manual.pdf).
