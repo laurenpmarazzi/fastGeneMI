@@ -70,5 +70,5 @@ test_that("Testing B-spline estiamtor", {
   expect_identical(is.matrix(mim.bspline), TRUE)
   expect_identical(isSymmetric(mim.bspline), TRUE)
   expect_equal(nrow(mim.bspline), 4)
-  expect_equal(mim.bspline, mim.ml, 1e-2)
+  expect_equal(mim.bspline, mim.ml, 1e-1)
 })

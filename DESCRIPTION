@@ -7,14 +7,12 @@ Date: 2019-03-22
 Author: Jonathan Ish-Horowicz
 Maintainer: Jonathan Ish-Horowicz <jonathan.ish-horowicz17@imperial.ac.uk>
 Description: Provides implementations of several mutual information estimators
-  for use with the gene network inference algorthims CLR, ARACNE and MRNET.
+  for use with the gene network inference algorithms CLR, ARACNE and MRNET.
   Computations are performed in C++ using Rcpp and RcppArmadillo.
 Depends: R (>= 2.10)
 License: MIT + file LICENSE
 LazyData: true
 Imports: Rcpp (>= 0.12.9), infotheo, PRROC, minet, testthat
-Suggests: Rdpack
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 6.1.1
-RdMacros: Rdpack
 Encoding: UTF-8
