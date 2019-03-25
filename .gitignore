@@ -3,4 +3,4 @@ src/*.so
 man/
 .Rhistory
 R/.Rhistory
-cran-comments.md
+src/symbols.rds

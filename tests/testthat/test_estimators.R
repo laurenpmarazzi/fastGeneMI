@@ -6,11 +6,11 @@ n.bins <- 10
 test_that("Testing ML estimator", {
 
   run.tests <- function(disc.method) {
-    mim.fgmi <- get.mim.ML(iris[,1:4], disc.method, n.bins=n.bins)
+    mim.fgmi <- get.mim.ML(iris[,1:4], discretisation=disc.method, n.bins=n.bins)
     expect_identical(is.matrix(mim.fgmi), TRUE)
     expect_identical(isSymmetric(mim.fgmi), TRUE)
     expect_equal(nrow(mim.fgmi), 4)
-    iris.disc <- infotheo::discretize(iris[,1:4], disc.method, nbins = n.bins)
+    iris.disc <- infotheo::discretize(iris[,1:4], disc.method, nbins=n.bins)
     mim.it <- infotheo::mutinformation(iris.disc, method = "emp")
     expect_equivalent(mim.fgmi, mim.it)
   }
@@ -22,12 +22,12 @@ test_that("Testing ML estimator", {
 test_that("Testing MM estimator", {
   
   run.tests <- function(disc.method) {
-    mim.fgmi <- get.mim.MM(iris[,1:4], disc.method, n.bins=n.bins)
+    mim.fgmi <- get.mim.MM(iris[,1:4], discretisation=disc.method, n.bins=n.bins)
     expect_identical(is.matrix(mim.fgmi), TRUE)
     expect_identical(isSymmetric(mim.fgmi), TRUE)
     expect_equal(nrow(mim.fgmi), 4)
-    iris.disc <- infotheo::discretize(iris[,1:4], disc.method, nbins = n.bins)
-    mim.it <- infotheo::mutinformation(iris.disc, method = "mm")
+    iris.disc <- infotheo::discretize(iris[,1:4], disc.method, nbins=n.bins)
+    mim.it <- infotheo::mutinformation(iris.disc, method="mm")
     expect_equivalent(mim.fgmi, mim.it)
   }
   
@@ -38,7 +38,7 @@ test_that("Testing MM estimator", {
 test_that("Testing CS estimator", {
   
   run.tests <- function(disc.method) {
-    mim.fgmi <- get.mim.CS(iris[,1:4], disc.method, n.bins=n.bins)
+    mim.fgmi <- get.mim.CS(iris[,1:4], discretisation=disc.method, n.bins=n.bins)
     expect_identical(is.matrix(mim.fgmi), TRUE)
     expect_identical(isSymmetric(mim.fgmi), TRUE)
     expect_equal(nrow(mim.fgmi), 4)
@@ -51,12 +51,12 @@ test_that("Testing CS estimator", {
 test_that("Testing Shrinkage estimator", {
   
   run.tests <- function(disc.method) {
-    mim.fgmi <- get.mim.shrink(iris[,1:4], disc.method, n.bins=n.bins)
+    mim.fgmi <- get.mim.shrink(iris[,1:4], discretisation=disc.method, n.bins=n.bins)
     expect_identical(is.matrix(mim.fgmi), TRUE)
     expect_identical(isSymmetric(mim.fgmi), TRUE)
     expect_equal(nrow(mim.fgmi), 4)
-    iris.disc <- infotheo::discretize(iris[,1:4], disc.method, nbins = n.bins)
-    mim.it <- infotheo::mutinformation(iris.disc, method = "shrink")
+    iris.disc <- infotheo::discretize(iris[,1:4], disc.method, nbins=n.bins)
+    mim.it <- infotheo::mutinformation(iris.disc, method="shrink")
     #expect_equivalent(mim.fgmi, mim.it)
   }
   
@@ -65,8 +65,8 @@ test_that("Testing Shrinkage estimator", {
 })
 
 test_that("Testing B-spline estiamtor", {
-  mim.bspline <- get.mim.bspline(iris[,1:4], order = 1, n.bins = n.bins)
-  mim.ml <- get.mim.ML(iris[,1:4], discretisation = "equalwidth", n.bins = n.bins)
+  mim.bspline <- get.mim.bspline(iris[,1:4], order=1, n.bins=n.bins)
+  mim.ml <- get.mim.ML(iris[,1:4], discretisation="equalwidth", n.bins=n.bins)
   expect_identical(is.matrix(mim.bspline), TRUE)
   expect_identical(isSymmetric(mim.bspline), TRUE)
   expect_equal(nrow(mim.bspline), 4)
