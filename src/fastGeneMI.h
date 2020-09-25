@@ -11,7 +11,7 @@
 #include <map>
 #include <utility> 
 
-#include <omp.h>
+//#include <omp.h>
 // [[Rcpp::plugins(openmp)]]
 #include <unistd.h>
 
